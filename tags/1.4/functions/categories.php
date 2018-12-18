@@ -1,0 +1,160 @@
+<?php
+function convert_data_get_child_categories($parent_id=0, $exclude='', $data_type=0){
+	global $wpdb;
+	
+    if($exclude == ""){
+    	$where = "taxonomy='category' AND parent='".$parent_id."'";
+    }else{
+    	$where = "(taxonomy='category' AND parent='".$parent_id."') AND (term_id NOT IN ($exclude))";
+    }
+    
+	$categories_child_count = $wpdb->get_var( "SELECT COUNT(*) FROM $wpdb->term_taxonomy WHERE ".$where."" );
+	$categories_child = $wpdb->get_results("SELECT * FROM $wpdb->term_taxonomy WHERE ".$where." order by term_id ASC");
+	$get_sub = '';
+	$text_child_array = '';
+	$ii = 0;
+	foreach($categories_child as $sub){
+		$sub_id = $sub->term_taxonomy_id;
+		$sub_category_id = $sub->term_id;
+		$sub_count = $sub->count;
+		$sub_category_link = get_category_link( $sub_category_id );
+		$sub_description = esc_attr($sub->description);
+		++$ii;
+		$get_sub_title = $wpdb->get_row( "SELECT * FROM $wpdb->terms WHERE term_id='".$sub_category_id."'" );
+		if(function_exists('convert_data_filter')){
+			$sub_category_title = convert_data_filter($get_sub_title->name);
+			$sub_category_description = convert_data_filter($sub_description);
+		}else{
+			$sub_category_title = esc_attr($get_sub_title->name);
+			$sub_category_description = esc_attr($sub_description);
+		}
+		
+		$get_sub .= "\n".'<li><a href="'.esc_url($sub_category_link).'">'.esc_attr($get_sub_title->name).'</a>'.convert_data_get_child_categories($sub_category_id, $exclude, $data_type).'</li>';
+		
+		if($categories_child_count == $ii){
+			$add_comma = '';
+		}else{
+			$add_comma = ',';
+		}
+		
+		if(convert_data_get_child_categories($sub_category_id, $exclude, $data_type) == ""){
+			$get_child = "";
+		}else{
+			$childs = convert_data_get_child_categories($sub_category_id, $exclude, $data_type);
+			$get_child = "'child' => array(\n".$childs."),\n";
+		}
+		
+		$text_child_array .= "array('id' => '".$sub_category_id."', 'title' => '".$sub_category_title."', 'description' => '".$sub_category_description."', ".$get_child.")".$add_comma."\n";
+	}
+	if($data_type == 1){
+		return $text_child_array;
+	}else{
+		return $get_sub;	
+	}
+}
+function convert_data_get_categories($justparent=0, $exclude='', $data_type=0, $prefix=''){
+    global $wpdb;
+	
+	if($prefix == ""){
+		$data_prefix = '';
+	}else{
+		$data_prefix = $prefix;
+	}
+	
+    if($exclude == ""){
+    	$where = "taxonomy='category' AND parent='0'";
+    }else{
+    	$where = "(taxonomy='category' AND parent='0') AND (term_id NOT IN ($exclude))";
+    }
+	$text = '<ul>'."\n";
+	$text_array = '';
+	$categories = $wpdb->get_results("SELECT * FROM $wpdb->term_taxonomy WHERE ".$where." order by term_id ASC");
+	foreach($categories as $category){
+		$id = $category->term_taxonomy_id;
+		$category_id = $category->term_id;
+		$count = $category->count;
+		
+		$category_link = get_category_link( $category_id );
+		
+		if(function_exists('convert_data_filter')){
+			$description = convert_data_filter($category->description);
+		}else{
+			$description = esc_attr($category->description);
+		}
+
+		
+		if($justparent == 1){
+			$get_sub = '';
+			//$text_child_array = "''<br />";
+			$text_child_array = "''\n";
+		}else{
+			$get_sub = convert_data_get_child_categories($category_id, $exclude, $data_type);
+			$text_child_array = convert_data_get_child_categories($category_id, $exclude, $data_type);
+			/*
+			$categories_child_count = $wpdb->get_var( "SELECT COUNT(*) FROM $wpdb->term_taxonomy WHERE taxonomy='category' AND parent='".$category_id."'" );
+			$categories_child = $wpdb->get_results("SELECT * FROM $wpdb->term_taxonomy WHERE taxonomy='category' AND parent='".$category_id."' order by term_id ASC");
+			$get_sub = '';
+			$text_child_array = '';
+			$ii = 0;
+			foreach($categories_child as $sub){
+				$sub_id = $sub->term_taxonomy_id;
+				$sub_category_id = $sub->term_id;
+				$sub_count = $sub->count;
+				$sub_category_link = get_category_link( $sub_category_id );
+				$sub_description = esc_attr($sub->description);
+				++$ii;
+				$get_sub_title = $wpdb->get_row( "SELECT * FROM $wpdb->terms WHERE term_id='".$sub_category_id."'" );
+				if(function_exists('convert_data_filter')){
+					$sub_category_title = convert_data_filter($get_sub_title->name);
+					$sub_category_description = convert_data_filter($sub_description);
+				}else{
+					$sub_category_title = esc_attr($get_sub_title->name);
+					$sub_category_description = esc_attr($sub_description);
+				}
+				
+				$get_sub .= "\n".'<li><a href="'.esc_url($sub_category_link).'">'.esc_attr($get_sub_title->name).'</a></li>';
+				
+				if($categories_child_count == $ii){
+					$add_comma = '';
+				}else{
+					$add_comma = ',';
+				}
+				$text_child_array .= "array('id' => '".$sub_category_id."', 'title' => '".$sub_category_title."', 'description' => '".$sub_category_description."')".$add_comma."\n";
+			}
+			*/
+		}
+
+		$get_title = $wpdb->get_row( "SELECT * FROM $wpdb->terms WHERE term_id='".$category_id."'" );
+		if(function_exists('convert_data_filter')){
+			$category_title = convert_data_filter($get_title->name);
+		}else{
+			$category_title = esc_attr($get_title->name);
+		}
+		
+		$text .= '<li><a href="'.esc_url($category_link).'">'.esc_attr($get_title->name).'</a>';
+		if($justparent != 1){
+			if($get_sub != ""){
+				$text .= "\n".'<ul>'.$get_sub."\n".'</ul>'."\n";
+			}
+		}
+		$text .= '</li>'."\n";
+
+		$text_array .= '$Categories[\''.$category_id.'\'] = array('."\n";
+		//$text_array .= "'id' => '".$category_id."',\n";
+		$text_array .= "'title' => '".$category_title."',\n";
+		$text_array .= "'description' => '".$description."',\n";
+		if($text_child_array == ""){
+			$text_array .= "'child' => ''\n";
+		}else{
+			$text_array .= "'child' => array(\n".$text_child_array."),\n";
+		}
+		$text_array .= ");\n";
+	}
+	$text .= '</ul>';
+	if($data_type == 1){
+		return "function ".$data_prefix."categories(){\n".$text_array."\nreturn $"."Categories;\n}";
+	}else{
+		return $text;
+	}
+}
+?>
