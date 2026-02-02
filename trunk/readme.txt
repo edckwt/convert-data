@@ -1,14 +1,14 @@
 === Convert Data ===
 Contributors: EDC Team
-Donate link: http://www.edc.org.kw
+Donate link: https://edc.org.kw
 Tags: source, data, array, json, php, function, EDC
-Requires at least: 3.0
-Tested up to: 4.9.2
-Stable tag: 1.7
+Requires at least: 5.0
+Tested up to: 6.7.2
+Stable tag: 2.5
 License: GPLv2 or later
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 This plugin produce for you code is array of categories and posts.
-
 
 == Description ==
 
@@ -21,7 +21,7 @@ Features:
 * Array Posts IDs.
 * Array Posts info.
 
-PS: For Support click to [Islam.com.kw](http://www.islam.com.kw), [powered by EDC (e-Da`wah Committee)](http://www.edc.org.kw).
+PS: For Support click to [Mawthuq.net](https://www.mawthuq.net), [powered by EDC (e-Da`wah Committee)](https://edc.org.kw).
 
 == Installation ==
 
@@ -38,16 +38,38 @@ PS: For Support click to [Islam.com.kw](http://www.islam.com.kw), [powered by ED
 
 == Changelog ==
 
-= 1.7 =
+= 2.5 =
+* Fixed: Post IDs.
 
+= 2.4 =
+* Fixed: code.
+* Update: Functions.
+
+= 2.3 =
+* Update: Functions.
+
+= 2.2 =
+* Update: Functions.
+
+= 2.1 =
+* Update: Function.
+
+= 2 =
+* Update: Function.
+
+= 1.9 =
+* Update: Function.
+
+= 1.8 =
+* Update: Function.
+
+= 1.7 =
 * Update: Function.
 
 = 1.6 =
-
 * Fixed: Categoreis Function.
 
 = 1.5 =
-
 * Added: New Options.
 * Fixed: Functions.
 * Added: Pagination.
